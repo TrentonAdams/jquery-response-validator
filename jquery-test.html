@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>jQuery testing</title>
+    <script type="text/javascript"
+            src="jquery-1.8.3.min.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+    /*      <![CDATA[ */
+    function jqvlog()
+    {
+        if (!window.console) window.console = {};
+        if (!window.console.log) window.console.log = function ()
+        {
+        };
+
+        console.log.apply(console, arguments);
+    }
+
+    (function ($)
+    {
+        $(document).ready(function ()
+        {
+            $('#validate').unbind('click.validate').bind('click.validate',
+                    function (e)
+                    {
+                        $.ajax({
+                            url: 'jquery-snippet.html',
+                            dataType: 'html',
+                            type: 'GET',
+                            async: true,
+                            cache: false,
+//                            auW3CValidation: false, /* custom option*/
+                            auCustom: {gaTrackView: false},
+                            success: function (page, status, jqXHR)
+                            {
+                                jqvlog('snippet: %s',
+                                        jqXHR.responseText);
+                            },
+                            error: function (jqXHR, textStatus, thrownError)
+                            {
+                                jqvlog("oros - w3c validate error %o : %s : %s",
+                                        jqXHR,
+                                        textStatus, thrownError);
+                            }
+                        });
+                    });
+        });
+
+        $.fn.w3cValidate = function (options)
+        {  // BEGIN w3cValidate plugin
+            // this is still docs
+            var settings = $.extend({
+                /**
+                 * Url to the w3c validator.  It must be on the same domain,
+                 * or the browser will not be able to receive any data
+                 * back from it except headers.  Defaults to
+                 * /w3c-validator/check, where it expects you have installed
+                 * or setup mod-proxy to point to, an installation of w3c
+                 * validator.
+                 */
+                url: '/w3c-validator/check',
+                /**
+                 * The two doctype settings are the same as those
+                 * contained on the "direct input" tab of the validator. View
+                 * the source of the html to grab the one you need.
+                 */
+                doctype: 'XHTML 1.0 Transitional',
+                doctype_short: 'xhtml10',
+                /**
+                 * The div where you would like results output to.
+                 */
+                divSelector: '#validated',
+                /**
+                 * The validator wraps your html snippet with the proper html
+                 * wrapper, based on the doctype you passed in.  This
+                 * value is the compensator for that wrap, so that we can tell
+                 * you what line of your snippet failed validation. For xhtml10,
+                 * that results in 12 lines preceding your snippet.
+                 */
+                lineOffset: 12
+            }, options);
+
+            $(document).ajaxSuccess(function (event, xmlHttpRequest,
+                    ajaxOptions)
+            {   // BEGIN ajaxSuccess hook
+                jqvlog('w3cValidation: %o', ajaxOptions.w3cValidation);
+                if ((ajaxOptions.w3cValidation === undefined ||
+                        !ajaxOptions.auW3CValidation) &&
+                        ajaxOptions.dataType == 'html')
+                {
+                    var data = {fragment: xmlHttpRequest.responseText,
+                        output: 'json', doctype: settings.doctype,
+                        prefill_doctype: settings.doctype_short, prefill: '1',
+                        group: '0'};
+                    jqvlog('data: %o', data);
+                    $.ajax({
+                        url: settings.url,
+                        data: data,
+                        dataType: 'json',
+                        type: 'POST',
+                        w3cValidation: true, /* custom option*/
+                        auCustom: {gaTrackView: false},
+                        success: function (page, status, jqXHR)
+                        {
+                            $(settings.divSelector).html('');
+                            var lines = xmlHttpRequest.responseText.split('\n');
+                            var newText = '';
+                            var line = 1;
+                            $.each(lines, function ()
+                            {
+                                newText = newText + line +
+                                        ' : <span style="background-color: #ccc">' +
+                                        $('<div/>').text(this).html() +
+                                        '</span>\n';
+                                line++;
+                            });
+                            $(settings.divSelector).append('<div><pre>' +
+                                    newText + '</pre></div>');
+                            for (var index in page.messages)
+                            {
+                                jqvlog('explanation: %o',
+                                        page.messages[index].explanation);
+                                jqvlog('message: %o',
+                                        page.messages[index].message);
+                                jqvlog('line: %d',
+                                        page.messages[index].lastLine -
+                                                settings.lineOffset);
+                                $(settings.divSelector).append('<p>' +
+                                        '<strong>line: ' +
+                                        (page.messages[index].lastLine -
+                                                settings.lineOffset) +
+                                        ',' + page.messages[index].lastColumn +
+                                        '</strong> ' +
+                                        page.messages[index].message +
+                                        '</p>');
+                            }
+                            jqvlog('w3c response: %o', page);
+                        },
+                        error: function (jqXHR, textStatus, thrownError)
+                        {
+                            jqvlog("w3c validate error %o : %s : %s",
+                                    jqXHR,
+                                    textStatus, thrownError);
+                            $(settings.divSelector).html('');
+                            $(settings.divSelector).append('<p>' +
+                                    thrownError + '</p>');
+                            $(settings.divSelector).append('<p>' +
+                                    'An error occurred accessing the ' +
+                                    'validator at ' + settings.url +
+                                    '.  Ensure the validator' +
+                                    ' exists, and that it is on the same ' +
+                                    'host as the script using it.' +
+                                    thrownError + '</p>');
+                        }
+                    });
+                }
+            });   // END ajaxSuccess hook
+        }  // END w3cValidate plugin
+        $(document).w3cValidate({})
+    }(jQuery));
+    /*      ]]> */
+</script>
+
+<a id="validate" href="#">Validate Ajax</a>
+
+<div id="validated"></div>
+</body>
+</html>
