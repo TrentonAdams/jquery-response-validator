@@ -1,4 +1,4 @@
-drunken-adventure
+miniature-drunken-adventure
 =================
 
 jQuery plugin for validating ajax html responses.  It's a drunken
