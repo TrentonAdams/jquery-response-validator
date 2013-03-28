@@ -29,11 +29,20 @@ function jqvlog()
                  * The two doctype settings are the same as those
                  * contained on the "direct input" tab of the validator. View
                  * the source of the html to grab the one you need.
+                 *
+                 * default: doctype: 'XHTML 1.0 Transitional'
+                 *          prefill_doctype: 'xhtml10'
                  */
                 doctype: 'XHTML 1.0 Transitional',
-                doctype_short: 'xhtml10',
+                doctype_prefill_doctypeshort: 'xhtml10',
                 /**
-                 * The div where you would like results output to.
+                 * The div where you would like results output to.  They will
+                 * be output to another div which is hidden by default, and
+                 * a simple message will be displayed to indicate validation
+                 * failure.  This message will be clickable, to show more
+                 * information.
+                 *
+                 * default: #validated
                  */
                 divSelector: '#validated',
                 /**
@@ -56,7 +65,7 @@ function jqvlog()
                 {
                     var data = {fragment: xmlHttpRequest.responseText,
                         output: 'json', doctype: settings.doctype,
-                        prefill_doctype: settings.doctype_short, prefill: '1',
+                        prefill_doctype: settings.prefill_doctype, prefill: '1',
                         group: '0'};
                     jqvlog('data: %o', data);
                     $.ajax({
@@ -97,7 +106,7 @@ function jqvlog()
                                         '<strong>line: ' +
                                         (page.messages[index].lastLine -
                                                 settings.lineOffset) +
-                                        ',' +
+                                        ',col: ' +
                                         page.messages[index].lastColumn +
                                         '</strong> ' +
                                         page.messages[index].message +
