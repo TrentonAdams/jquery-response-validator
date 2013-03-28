@@ -65,9 +65,11 @@ function jqvlog()
                         dataType: 'json',
                         type: 'POST',
                         w3cValidation: true, /* custom option*/
-                        auCustom: {gaTrackView: false},
                         success: function (page, status, jqXHR)
                         {
+                            jqvlog('w3c response: %o', page);
+                            jqvlog('w3c response: %s', jqXHR.responseText);
+
                             $(settings.divSelector).html('');
                             var lines = xmlHttpRequest.responseText.split('\n');
                             var newText = '';
@@ -101,7 +103,6 @@ function jqvlog()
                                         page.messages[index].message +
                                         '</p>');
                             }
-                            jqvlog('w3c response: %o', page);
                         },
                         error: function (jqXHR, textStatus, thrownError)
                         {
@@ -123,6 +124,5 @@ function jqvlog()
                 }
             });   // END ajaxSuccess hook
         }  // END w3cValidate plugin
-        $(document).w3cValidate({});
     });
 }(jQuery));

@@ -41,7 +41,12 @@
                             }
                         });
                     });
-            $(document).w3cValidate({});
+            /**
+             * we'll fake a w3c-validator url, which returns a failed response,
+             * matching what it would return for the jquery-snippet.html
+             */
+
+            $(document).w3cValidate({url: 'sample-w3c-response.js'});
         });
     }(jQuery));
     /*      ]]> */
