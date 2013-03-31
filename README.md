@@ -1,8 +1,8 @@
-miniature-drunken-adventure
+jquery-response-validator
 =================
 
-jQuery plugin for validating ajax html responses.  It's a drunken
-mixed-mash of JavaScript, jQuery, and the w3c-validator.
+jQuery plugin for validating ajax html responses.  It's a mixed-mash 
+of JavaScript, jQuery, and the w3c-validator.
 
 An MIT, Apache, or LGPL license attachment to this project are forthcoming.
 I just haven't decided which one yet.
